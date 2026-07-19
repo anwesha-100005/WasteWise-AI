@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WasteWise AI — Predict &amp; Prevent Food Waste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #1F2E1A;
+    --leaf: #3D6B3D;
+    --leaf-light: #6E9A5A;
+    --wheat: #F2EDE1;
+    --harvest: #C97B2E;
+    --alert: #B23A2E;
+    --ink: #24261F;
+    --paper: #FBF9F3;
+    --line: rgba(31,46,26,0.14);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    line-height: 1.55;
+  }
+
+  /* ---------- Ambient texture ---------- */
+  .grain-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(61,107,61,0.06), transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(201,123,46,0.07), transparent 45%);
+  }
+
+  .shell { position: relative; z-index: 1; }
+
+  /* ---------- Nav ---------- */
+  nav {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; letter-spacing: 0.01em; color: var(--soil); }
+  .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--harvest); }
+  .nav-tag { font-size: 12px; color: #7d8071; letter-spacing: 0.05em; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 48px 24px 20px;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-top: 32px; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--leaf);
+    font-weight: 600;
+    margin-bottom: 18px;
+    background: #E4EEDD;
+    padding: 6px 12px 6px 8px;
+    border-radius: 100px;
+  }
+  .eyebrow .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--leaf); }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(34px, 4.6vw, 54px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    color: var(--soil);
+  }
+  h1 em { font-style: italic; color: var(--harvest); }
+
+  .sub { font-size: 16.5px; color: #565a4e; max-width: 46ch; margin-bottom: 26px; }
+
+  .stat-row { display: flex; gap: 28px; flex-wrap: wrap; }
+  .stat b { display: block; font-family: 'Fraunces', serif; font-size: 24px; color: var(--soil); font-weight: 600; }
+  .stat span { font-size: 12px; color: #7d8071; letter-spacing: 0.03em; }
+
+  /* ---------- Hero illustration (signature element) ---------- */
+  .plate-wrap { display: flex; justify-content: center; }
+  .plate-wrap svg { width: 100%; max-width: 320px; height: auto; }
+  @keyframes steam {
+    0%, 100% { transform: translateY(0) scaleY(1); opacity: 0.55; }
+    50% { transform: translateY(-6px) scaleY(1.08); opacity: 0.85; }
+  }
+  .steam-line { animation: steam 3.2s ease-in-out infinite; transform-origin: bottom; }
+  .steam-line:nth-child(2) { animation-delay: 0.5s; }
+  .steam-line:nth-child(3) { animation-delay: 1s; }
+
+  /* ---------- Form section ---------- */
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 24px 100px; }
+
+  .panel-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .panel-heading h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--soil);
+    margin: 0;
+  }
+  .panel-heading span { font-size: 13px; color: #8b8e7f; }
+
+  form {
+    background: var(--wheat);
+    border-radius: var(--radius);
+    padding: 36px;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(31,46,26,0.04);
+  }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; }
+
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    main { padding: 20px 16px 72px; }
+    form { padding: 22px; }
+  }
+
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--soil);
+    margin-bottom: 7px;
+  }
+
+  select, input {
+    width: 100%;
+    padding: 12px 13px;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    appearance: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%233D6B3D' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+  }
+
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--leaf);
+    box-shadow: 0 0 0 3px rgba(61,107,61,0.15);
+  }
+
+  button {
+    margin-top: 30px;
+    width: 100%;
+    padding: 16px;
+    background: var(--soil);
+    color: var(--wheat);
+    border: none;
+    border-radius: 11px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15.5px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button:hover:not(:disabled) { background: var(--leaf); }
+  button:active:not(:disabled) { transform: scale(0.995); }
+  button:disabled { background: #a2a496; cursor: wait; }
+
+  /* ---------- Result ---------- */
+  #result-panel {
+    display: none;
+    margin-top: 28px;
+    background: linear-gradient(180deg, #FBF9F3 0%, #F6F2E7 100%);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 36px;
+    animation: rise 0.4s ease;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-top { display: flex; align-items: center; gap: 26px; margin-bottom: 26px; flex-wrap: wrap; }
+
+  .gauge-wrap { position: relative; width: 116px; height: 116px; flex-shrink: 0; }
+  .gauge-wrap svg { transform: rotate(-90deg); }
+  .gauge-bg { fill: none; stroke: var(--line); stroke-width: 9; }
+  .gauge-fg {
+    fill: none;
+    stroke: var(--harvest);
+    stroke-width: 9;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(.34,1.56,.64,1), stroke 0.3s ease;
+  }
+  .gauge-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .gauge-label .num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; color: var(--soil); }
+  .gauge-label .unit { font-size: 9.5px; color: #7a7d6e; letter-spacing: 0.06em; }
+
+  .result-heading .tag {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+  .tag.low { background: #E4EEDD; color: var(--leaf); }
+  .tag.high { background: #F6E3DC; color: var(--alert); }
+
+  .result-heading h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: var(--soil);
+  }
+  .result-heading p { margin: 0; font-size: 13.5px; color: #7d8071; }
+
+  .rec-block {
+    border-top: 1px solid var(--line);
+    padding-top: 24px;
+  }
+  .rec-block h3 {
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--leaf);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rec-block h3::before { content: ''; width: 14px; height: 1.5px; background: var(--leaf); display: inline-block; }
+  .rec-block p { white-space: pre-wrap; font-size: 15.5px; color: var(--ink); margin: 0; }
+
+  #error-panel {
+    display: none;
+    margin-top: 20px;
+    padding: 18px 20px;
+    background: #F6E3DC;
+    border-radius: 12px;
+    color: var(--alert);
+    font-size: 14px;
+  }
+
+  footer {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    color: #8b8e7f;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer .sdg { display: flex; align-items: center; gap: 8px; }
+  footer .sdg-badge {
+    width: 20px; height: 20px; border-radius: 6px; background: var(--leaf);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="grain-bg"></div>
+<div class="shell">
+
+<nav>
+  <div class="brand"><span class="dot"></span> WasteWise AI</div>
+  <div class="nav-tag">IBM SkillsBuild Internship</div>
+</nav>
+
+<div class="hero">
+  <div>
+    <div class="eyebrow"><span class="pip"></span> AI-powered · SDG 12</div>
+    <h1>Know before<br>you cook <em>too much</em>.</h1>
+    <p class="sub">Describe your event and WasteWise AI predicts expected food wastage in seconds, then hands you specific, data-backed ways to cut it down — no guesswork.</p>
+    <div class="stat-row">
+      <div class="stat"><b>68</b><span>events analyzed</span></div>
+      <div class="stat"><b>10</b><span>event factors</span></div>
+      <div class="stat"><b>1</b><span>AI recommendation engine</span></div>
+    </div>
+  </div>
+
+  <div class="plate-wrap">
+    <svg viewBox="0 0 240 240" fill="none">
+      <circle cx="120" cy="150" r="76" fill="#F2EDE1" stroke="#1F2E1A" stroke-opacity="0.1" stroke-width="2"/>
+      <ellipse cx="120" cy="150" rx="52" ry="52" fill="#FBF9F3"/>
+      <path d="M84 148c8-14 26-20 40-12" stroke="#C97B2E" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="112" cy="140" r="7" fill="#3D6B3D"/>
+      <circle cx="134" cy="152" r="6" fill="#6E9A5A"/>
+      <circle cx="100" cy="160" r="5.5" fill="#B23A2E" opacity="0.75"/>
+      <circle cx="140" cy="132" r="5" fill="#C97B2E"/>
+      <g opacity="0.6">
+        <path class="steam-line" d="M96 90 Q92 78 98 68" stroke="#8b8e7f" stroke-width="3" stroke-linecap="round"/>
+        <path class="steam-line" d="M118 84 Q114 70 120 58" stroke="#8b8e7f" stroke-width="3" stroke-linecap="round"/>
+        <path class="steam-line" d="M140 90 Q136 78 142 68" stroke="#8b8e7f" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<main>
+  <div class="panel-heading">
+    <h2>Run a prediction</h2>
+    <span>Takes about 10 seconds</span>
+  </div>
+
+  <form id="predict-form">
+    <div class="grid">
+      <div class="field"><label>Type of food</label>
+        <select id="Type of Food"><option>Meat</option><option>Vegetables</option><option>Dairy</option><option>Grains</option><option>Fruits</option><option>Bakery</option></select>
+      </div>
+      <div class="field"><label>Event type</label>
+        <select id="Event Type"><option>Corporate</option><option>Birthday</option><option>Wedding</option><option>Conference</option><option>Social Gathering</option></select>
+      </div>
+      <div class="field"><label>Number of guests</label>
+        <input type="number" id="Number of Guests" value="300" min="1" required />
+      </div>
+      <div class="field"><label>Quantity of food (units)</label>
+        <input type="number" id="Quantity of Food" value="400" min="1" required />
+      </div>
+      <div class="field"><label>Storage conditions</label>
+        <select id="Storage Conditions"><option>Refrigerated</option><option>Room Temperature</option></select>
+      </div>
+      <div class="field"><label>Purchase history</label>
+        <select id="Purchase History"><option>Regular</option><option>Occasional</option><option>First-time</option></select>
+      </div>
+      <div class="field"><label>Seasonality</label>
+        <select id="Seasonality"><option>All Seasons</option><option>Summer</option><option>Winter</option><option>Monsoon</option></select>
+      </div>
+      <div class="field"><label>Preparation method</label>
+        <select id="Preparation Method"><option>Buffet</option><option>Finger Food</option><option>Plated</option></select>
+      </div>
+      <div class="field"><label>Location</label>
+        <select id="Geographical Location"><option>Urban</option><option>Suburban</option><option>Rural</option></select>
+      </div>
+      <div class="field"><label>Pricing tier</label>
+        <select id="Pricing"><option>Low</option><option>High</option></select>
+      </div>
+    </div>
+    <button type="submit" id="submit-btn">Predict wastage</button>
+  </form>
+
+  <div id="result-panel">
+    <div class="result-top">
+      <div class="gauge-wrap">
+        <svg width="116" height="116" viewBox="0 0 116 116">
+          <circle class="gauge-bg" cx="58" cy="58" r="49" />
+          <circle class="gauge-fg" id="gauge-circle" cx="58" cy="58" r="49" stroke-dasharray="307.9" stroke-dashoffset="307.9" />
+        </svg>
+        <div class="gauge-label"><span class="num" id="gauge-value">$0</span><span class="unit">EST. WASTE</span></div>
+      </div>
+      <div class="result-heading">
+        <span class="tag low" id="result-tag">Low risk</span>
+        <h2>Predicted outcome</h2>
+        <p>Based on patterns across 68 comparable events</p>
+      </div>
+    </div>
+    <div class="rec-block">
+      <h3>What to change</h3>
+      <p id="recommendation-text"></p>
+    </div>
+  </div>
+
+  <div id="error-panel"></div>
+</main>
+
+<footer>
+  <span>WasteWise AI · AI Automation &amp; Intelligent Solutions Internship</span>
+  <span class="sdg"><span class="sdg-badge">12</span> Responsible Consumption &amp; Production</span>
+</footer>
+
+</div>
+
+<script>
+  const BACKEND_URL = "https://wastewise-ai-mzco.onrender.com/predict";
+
+  const fields = [
+    "Type of Food", "Number of Guests", "Event Type", "Quantity of Food",
+    "Storage Conditions", "Purchase History", "Seasonality",
+    "Preparation Method", "Geographical Location", "Pricing"
+  ];
+
+  const CIRC = 307.9; // 2 * PI * r(49)
+
+  document.getElementById("predict-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("submit-btn");
+    const resultPanel = document.getElementById("result-panel");
+    const errorPanel = document.getElementById("error-panel");
+    resultPanel.style.display = "none";
+    errorPanel.style.display = "none";
+    btn.disabled = true;
+    btn.textContent = "Thinking…";
+
+    const payload = {};
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      payload[f] = (el.type === "number") ? Number(el.value) : el.value;
+    });
+
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong.");
+
+      const wastage = data.predicted_wastage;
+      const isHigh = wastage > 30;
+
+      document.getElementById("gauge-value").textContent = "$" + wastage;
+      document.getElementById("recommendation-text").textContent = data.recommendation;
+
+      const tag = document.getElementById("result-tag");
+      tag.textContent = isHigh ? "Above average" : "Low risk";
+      tag.className = "tag " + (isHigh ? "high" : "low");
+
+      const pct = Math.min(wastage / 60, 1);
+      const circle = document.getElementById("gauge-circle");
+      circle.style.stroke = isHigh ? "#B23A2E" : "#C97B2E";
+      requestAnimationFrame(() => {
+        circle.style.strokeDashoffset = CIRC - (pct * CIRC);
+      });
+
+      resultPanel.style.display = "block";
+      resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (err) {
+      errorPanel.style.display = "block";
+      errorPanel.textContent = "Something went wrong: " + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Predict wastage";
+    }
+  });
+</script>
+
+</body>
+</html>
